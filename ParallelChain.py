@@ -76,15 +76,13 @@ def linkedin_chain():
     return linkedin_post_chain
 
 
-def instagram_chain(content_dict: dict[str, str]):
-    input_content = content_dict["content"]
-    print(f"Insta: {input_content}")
-    insta_post_prompt = ChatPromptTemplate.from_messages([(
-        "system", "You are a social media expert. Help to rewrite the article summary into viral insta post"),
-        "user", "influence my viewer on: {content}"
+def instagram_chain():
+    insta_post_prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a social media expert. Help to rewrite the article summary into viral insta post"),
+        ("user", "influence my viewer on: {content}")
     ])
     insta_post_chain = insta_post_prompt | llm_general | StrOutputParser()
-    return insta_post_chain.invoke({"content": input_content})
+    return insta_post_chain
 
 
 # Sequential Chain
@@ -103,10 +101,9 @@ def generate_linkedin_post():
 ##Parallel Chain
 def generate_social_media_post():
     topic, no_of_article, tone = get_user_input()
-    insta_runnable = RunnableLambda(instagram_chain)
     output_chain = (article_chain() |
                     RunnableLambda(content_for_social_media_post) |
-                    RunnableParallel(branch={"linkedin": linkedin_chain(), "insta": insta_runnable}) |
+                    RunnableParallel(branch={"linkedin": linkedin_chain(), "insta": instagram_chain()}) |
                     RunnableLambda(display_post))
 
     return output_chain.invoke(
