@@ -8,9 +8,10 @@ import json
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
-from pydantic.v1 import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 model = ChatOllama(model="llama3.2:latest", temperature=0.5)
+
 
 ## String output parser
 # prompt = ChatPromptTemplate.from_messages([
@@ -43,6 +44,7 @@ class Casting(BaseModel):
     actor: str
     character: str
 
+
 class MovieInfo(BaseModel):
     model_config = ConfigDict(validate_by_name=True, extra="forbid")
     name: str = Field(alias="movie_name", description="The name of the movie")
@@ -68,14 +70,16 @@ prompt = ChatPromptTemplate.from_messages([
 
 parser = JsonOutputParser(pydantic_object=MovieInfo)
 chain = prompt | model | parser
-#print(parser.get_format_instructions())
-response: MovieInfo = chain.invoke({
+# chain = RunnableSequence(prompt, model, parser)
+# print(parser.get_format_instructions())
+response = chain.invoke({
     "movie_details": """Tourist Family is a 2025 Indian Tamil comedy-drama film written and directed by Abishan Jeevinth and produced by Million Dollar Studios and MRP Entertainment.
 The film stars M. Sasikumar as Dharmadas and Simran as Vasanthi, with Yogi Babu as Prakash and Ramesh Thilak as A. Bhairavan.
 The cast includes M. S. Bhaskar as Richard, Elango Kumaravel as Gunasekar, Sreeja Ravi as Mangaiyarkarasi, and Bagavathi Perumal as Inspector R. Raghavan.""",
     "instruction": parser.get_format_instructions(),
 })
 
-#print(response)
+print(response)
+print(type(response))
 json_data = json.dumps(response, indent=2)
 print(json_data)
