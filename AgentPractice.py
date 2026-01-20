@@ -26,7 +26,7 @@ def tell_me_a_joke(category: str):
     url = f"https://v2.jokeapi.dev/joke/{category if category in VALID_CATEGORIES else "any"}?type=single"
     print(url)
     response = requests.get(url)
-    print(response.content)
+    print(response.text)
     return response.json()
 
 
@@ -35,7 +35,7 @@ def get_weather(city: str):
     url = f"https://wttr.in/{city}?format=j1"
     print(url)
     res = requests.get(url)
-    # print(res.content)
+    print(res.text)
     return res.json
 
 
