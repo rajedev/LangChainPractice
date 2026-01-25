@@ -63,7 +63,7 @@ ai_agent = create_agent(
 #
 user_input = input("Tell me what kinda joke or weather info of city you want: ")
 result = ai_agent.invoke({
-    "messages": [HumanMessage(user_input.strip())]
+    "messages": [HumanMessage(content = user_input.strip())]
 })
 # print(result["messages"])
 print(result["messages"][-1].content)
