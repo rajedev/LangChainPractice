@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./langgraph/lg_smith_agent_practice.py:graph"
+  },
+  "env": ".env"
+}
