@@ -3,6 +3,8 @@ Author: Rajendhiran Easu
 Date: 25/01/26
 Description: 
 """
+from langchain_community.tools import WikipediaQueryRun
+from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
@@ -10,6 +12,8 @@ from langchain_ollama import ChatOllama
 teams = {"mkt": "marketing", "sal": "sales", "fin": "Finance"}
 student_dep = {"ece": "Electronic Communication", "eee": "Electrical & Electronic", "cse": "Computer Science"}
 
+wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=2000)
+wiki_tool = WikipediaQueryRun(api_wrapper=wrapper)
 
 @tool("get_employee_details", description="Extract the Employee department")
 def get_employee_details(eid: str) -> str:
@@ -28,8 +32,8 @@ def get_student_details(sid: str) -> str:
 # response = get_employee_details.invoke({"eid": "fin142"})
 # print(response)
 
-model = ChatOllama(model="llama3.2:latest", temperature=0)
-model_with_tools = model.bind_tools([get_employee_details, get_student_details])
+model = ChatOllama(model="gpt-oss:20b", temperature=0)
+model_with_tools = model.bind_tools([get_employee_details, get_student_details, wiki_tool])
 
 print(get_employee_details.name)
 print(get_employee_details.description)
@@ -42,7 +46,8 @@ print(get_employee_details.description)
 #     print(f"Tool Args: {tool["id"]}")
 
 # Step 1: Initial Call
-message: list[BaseMessage] = [HumanMessage(content="what is the department of student id with cse142?")]
+#message: list[BaseMessage] = [HumanMessage(content="what is the department of student id with cse142?")]
+message: list[BaseMessage] = [HumanMessage(content="what is the department of student id with cse142? and comparison of india and american syllabus in 50 words")]
 
 # Step 2: Tool Model generate
 ai_msg = model_with_tools.invoke(message)
@@ -69,4 +74,8 @@ for tool_call in ai_msg.tool_calls:
 
 # Step 4: Pass result back to model for final message construction
 final_resp = model_with_tools.invoke(message)
-print(final_resp.content)
+message.append(final_resp)
+for msg in message:
+    msg.pretty_print()
+    #print(f"{msg.__class__.__name__}: {msg.content}")
+#print(final_resp.content)
