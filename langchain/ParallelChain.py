@@ -103,7 +103,8 @@ def generate_social_media_post():
     topic, no_of_article, tone = get_user_input()
     output_chain = (article_chain() |
                     RunnableLambda(content_for_social_media_post) |
-                    RunnableParallel(branch={"linkedin": linkedin_chain(), "insta": instagram_chain()}) |
+                    #RunnableParallel(branch={"linkedin": linkedin_chain(), "insta": instagram_chain()}) |
+                    RunnableParallel(linkedin=linkedin_chain(), insta=instagram_chain()) |
                     RunnableLambda(display_post))
 
     return output_chain.invoke(
@@ -114,9 +115,9 @@ def generate_social_media_post():
 
 
 def display_post(social_media: dict[str, str]):
-    msg_post = social_media["branch"]
-    __beautify(post=msg_post["linkedin"], title="LinkedIn Post")
-    __beautify(post=msg_post["insta"], title="Instagram Post")
+        # msg_post = social_media["branch"]
+    __beautify(post=social_media["linkedin"], title="LinkedIn Post")
+    __beautify(post=social_media["insta"], title="Instagram Post")
 
 
 def __beautify(post: str, title: str):

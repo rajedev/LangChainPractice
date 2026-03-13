@@ -84,6 +84,15 @@ class NewsData(BaseModel):
     headline: Annotated[str, Field(description="news headline or summary")]
     category: Annotated[str, Field(description="news category")] = ""
 
+def branch_category_as(feed: NewsData) -> str:
+    if "Politics" in feed.category:
+        return content_for_front_page_news(feed.headline)
+    elif feed.category in ["Spiritual", "Crime"]:
+        return content_for_youtube_description(feed.headline)
+    elif "Sports" in feed.category:
+        return content_for_instagram(feed.headline)
+    else:
+        return content_for_whatsapp_msg(feed.headline)
 
 branch_category = RunnableBranch(
     (
@@ -106,7 +115,7 @@ branch_category = RunnableBranch(
 @log_info
 def check_news_category():
     llm = ChatOllama(model=MODEL_NAME, temperature=MODEL_TEMPERATURE).with_structured_output(schema=NewsData)
-    category_chain = prompt | llm | branch_category
+    category_chain = prompt | llm | RunnableLambda(branch_category_as)
     input_news = input("News Headline Pls: ")
     return category_chain.invoke({"news_headline": input_news})
 
